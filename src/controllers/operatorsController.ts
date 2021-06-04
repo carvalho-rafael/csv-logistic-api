@@ -26,8 +26,8 @@ export default {
     const operatorModel = entityManager.create(Operator, {
       name,
     })
-    await entityManager.save(operatorModel)
-    const operators = await entityManager.find(Operator, { order: { id: 1 } })
+    await entityManager.save(operatorModel);
+    const operators = await entityManager.find(Operator, { order: { id: 1 } });
 
     return res.status(203).json(operatorsView.renderMany(operators));
 
@@ -35,11 +35,11 @@ export default {
 
   async edit(req: Request, res: Response) {
     const { id } = req.params;
-    const { name } = req.body
+    const { name } = req.body;
 
     const entityManager = getManager();
-    await entityManager.update(Operator, id, { name })
-    const operators = await entityManager.find(Operator, { order: { id: 1 } })
+    await entityManager.update(Operator, id, { name });
+    const operators = await entityManager.find(Operator, { order: { id: 1 } });
 
     res.status(203).json(operatorsView.renderMany(operators));
   },
@@ -49,7 +49,7 @@ export default {
 
     const entityManager = getManager();
     await entityManager.delete(Operator, id)
-    const operators = await entityManager.find(Operator, { order: { id: 1 } })
+    const operators = await entityManager.find(Operator, { order: { id: 1 } });
 
     res.status(203).json(operatorsView.renderMany(operators));
   }

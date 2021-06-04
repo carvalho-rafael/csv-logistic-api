@@ -4,7 +4,8 @@ type ParsedClients = {
   name: string,
   birthday: string,
   value: number,
-  email: string
+  email: string,
+  operador_id?: number
 }
 
 export function mergeOperatorClients(operators: Operator[], clients: ParsedClients[]) {

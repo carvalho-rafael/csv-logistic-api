@@ -74,10 +74,7 @@ export default {
 
     const mergedClients = mergeOperatorClients(operators, parsedClients)
 
-    const clientModel = entityManager.create(Client, mergedClients.clients)
-
-    await entityManager.save(clientModel)
-
+    await entityManager.save(Client, mergedClients.clients)
     const clients = await entityManager.createQueryBuilder(Operator, 'operators')
       .leftJoinAndSelect('operators.clients', 'clients')
       .orderBy({
@@ -115,4 +112,22 @@ export default {
 
     res.download(filePath);
   },
+
+  async distribute(req: Request, res: Response) {
+    const entityManager = getManager();
+    const operators = await entityManager.find(Operator)
+    const allClients = await entityManager.find(Client, {order: {id: 'ASC'}})
+
+    const distributedClients = mergeOperatorClients(operators, allClients)
+
+    await entityManager.save(Client, distributedClients.clients)
+    const clients = await entityManager.createQueryBuilder(Operator, 'operators')
+      .leftJoinAndSelect('operators.clients', 'clients')
+      .orderBy({
+        'clients.id': 'ASC'
+      })
+      .getMany();
+
+    res.status(200).json(operatorClientsView.renderMany(clients));
+  }
 }

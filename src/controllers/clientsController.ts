@@ -21,10 +21,13 @@ export default {
   async index(req: Request, res: Response) {
     const entityManager = getManager();
 
-    const clients = await entityManager.find(Operator, {
-      relations: ['clients'],
-      order: { id: 1 }
-    })
+    const clients = await entityManager.createQueryBuilder(Operator, 'operators')
+      .leftJoinAndSelect('operators.clients', 'clients')
+      .orderBy({
+        'clients.id': 'ASC'
+      })
+      .getMany();
+
     res.status(200).json(operatorClientsView.renderMany(clients));
   },
 
@@ -75,10 +78,13 @@ export default {
 
     await entityManager.save(clientModel)
 
-    const clients = await entityManager.find(Operator, {
-      relations: ['clients'],
-      order: { id: 1 }
-    })
+    const clients = await entityManager.createQueryBuilder(Operator, 'operators')
+      .leftJoinAndSelect('operators.clients', 'clients')
+      .orderBy({
+        'clients.id': 'ASC'
+      })
+      .getMany();
+
     res.status(200).json(operatorClientsView.renderMany(clients));
   },
 
@@ -92,7 +98,7 @@ export default {
     const formatedClients = clients.map(client => {
       const birthdaySplited = client.birthday.split('-')
       const birthday = `${birthdaySplited[2]}/${birthdaySplited[1]}/${birthdaySplited[0]}`
-        return ({...client, birthday})
+      return ({ ...client, birthday })
     })
 
     const filePath = path.join(__dirname, '..', '..', 'uploads', 'save.csv')
@@ -105,7 +111,6 @@ export default {
         { id: 'email', title: 'email' },
       ]
     })
-
     await csvWriter.writeRecords(formatedClients)
 
     res.download(filePath);

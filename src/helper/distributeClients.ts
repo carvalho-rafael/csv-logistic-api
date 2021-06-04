@@ -1,6 +1,6 @@
 import Operator from "../models/Operator";
 
-type ParsedClients = {
+type Client = {
   name: string,
   birthday: string,
   value: number,
@@ -8,8 +8,8 @@ type ParsedClients = {
   operador_id?: number
 }
 
-export function mergeOperatorClients(operators: Operator[], clients: ParsedClients[]) {
-  const mergedClients = clients.reduce((amount: any, current) => {
+export function distributeClients(operators: Operator[], clients: Client[]) {
+  const distributedClients = clients.reduce((amount: any, current) => {
     const { clients } = amount;
     let { operatorCount } = amount;
 
@@ -25,5 +25,5 @@ export function mergeOperatorClients(operators: Operator[], clients: ParsedClien
     return amount;
   }, { clients: [], operatorCount: 0 })
 
-  return mergedClients;
+  return distributedClients;
 }

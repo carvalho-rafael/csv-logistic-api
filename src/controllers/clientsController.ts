@@ -3,19 +3,12 @@ import { getManager } from 'typeorm';
 import Client from '../models/Client';
 import Operator from '../models/Operator';
 import operatorClientsView from '../views/operatorClientsView';
-import { mergeOperatorClients } from '../helper/mergeOperatorClients';
+import { distributeClients } from '../helper/distributeClients';
 
 import { promises as fs } from 'fs'
 import path from 'path'
 import * as yup from 'yup'
 import { createObjectCsvWriter } from 'csv-writer';
-
-type ParsedClients = {
-  name: string,
-  birthday: string,
-  value: number,
-  email: string
-}
 
 export default {
   async index(req: Request, res: Response) {
@@ -38,7 +31,7 @@ export default {
     )
     const csvLine = file.split(/\n/);
 
-    const parsedClients: ParsedClients[] = csvLine
+    const parsedClients = csvLine
       .slice(1, csvLine.length - 1)
       .map((client: string, index) => {
         const rawClient = client.split(',')
@@ -72,9 +65,9 @@ export default {
     const entityManager = getManager();
     const operators = await entityManager.find(Operator)
 
-    const mergedClients = mergeOperatorClients(operators, parsedClients)
+    const distributedClients = distributeClients(operators, parsedClients)
 
-    await entityManager.save(Client, mergedClients.clients)
+    await entityManager.save(Client, distributedClients.clients)
     const clients = await entityManager.createQueryBuilder(Operator, 'operators')
       .leftJoinAndSelect('operators.clients', 'clients')
       .orderBy({
@@ -118,7 +111,7 @@ export default {
     const operators = await entityManager.find(Operator)
     const allClients = await entityManager.find(Client, {order: {id: 'ASC'}})
 
-    const distributedClients = mergeOperatorClients(operators, allClients)
+    const distributedClients = distributeClients(operators, allClients)
 
     await entityManager.save(Client, distributedClients.clients)
     const clients = await entityManager.createQueryBuilder(Operator, 'operators')

@@ -3,11 +3,12 @@ import { getManager } from 'typeorm';
 import Client from '../models/Client';
 import Operator from '../models/Operator';
 import operatorClientsView from '../views/operatorClientsView';
+import { mergeOperatorClients } from '../helper/mergeOperatorClients';
 
 import { promises as fs } from 'fs'
 import path from 'path'
 import * as yup from 'yup'
-import { mergeOperatorClients } from '../helper/mergeOperatorClients';
+import { createObjectCsvWriter } from 'csv-writer';
 
 type ParsedClients = {
   name: string,
@@ -79,5 +80,34 @@ export default {
       order: { id: 1 }
     })
     res.status(200).json(operatorClientsView.renderMany(clients));
+  },
+
+  async download(req: Request, res: Response) {
+    const entityManager = getManager();
+
+    const clients = await entityManager.find(Client, {
+      order: { id: 1 }
+    })
+
+    const formatedClients = clients.map(client => {
+      const birthdaySplited = client.birthday.split('-')
+      const birthday = `${birthdaySplited[2]}/${birthdaySplited[1]}/${birthdaySplited[0]}`
+        return ({...client, birthday})
+    })
+
+    const filePath = path.join(__dirname, '..', '..', 'uploads', 'save.csv')
+    const csvWriter = createObjectCsvWriter({
+      path: filePath,
+      header: [
+        { id: 'name', title: 'nome' },
+        { id: 'birthday', title: 'aniversario' },
+        { id: 'value', title: 'valor' },
+        { id: 'email', title: 'email' },
+      ]
+    })
+
+    await csvWriter.writeRecords(formatedClients)
+
+    res.download(filePath);
   },
 }

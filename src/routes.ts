@@ -22,6 +22,7 @@ routes.post('/operators', operatorsController.create);
 
 routes.get('/clients', clientsController.index);
 routes.post('/clients', upload.single('file'), clientsController.create);
+routes.get('/clients/download', clientsController.download);
 
 routes.patch('/operators/:id', operatorsController.edit);
 routes.delete('/operators/:id', operatorsController.delete);

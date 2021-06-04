@@ -8,7 +8,7 @@ export default {
       id: client.id,
       nome: client.name,
       aniversario: formatedBirthday,
-      value: client.value,
+      valor: client.value,
       email: client.email,
       operador: client.operator
     }
